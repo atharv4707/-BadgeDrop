@@ -34,6 +34,8 @@
     color: var(--text);
     min-height: 100vh;
     padding: 2rem 1rem 4rem;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   /* grid noise background */
@@ -49,7 +51,13 @@
     z-index: 0;
   }
 
-  .wrap { max-width: 860px; margin: 0 auto; position: relative; z-index: 1; }
+  .wrap { 
+    max-width: 860px; 
+    margin: 0 auto; 
+    position: relative; 
+    z-index: 1;
+    padding-bottom: 2rem;
+  }
 
   /* header */
   .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3rem; }
@@ -183,8 +191,9 @@
     display: grid; 
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
     gap: 16px; 
-    margin-bottom: 2.5rem;
+    margin-bottom: 3rem;
     animation: fadeInUp 0.8s ease-out 0.4s both;
+    width: 100%;
   }
   .badge-card {
     background: linear-gradient(135deg, var(--surface) 0%, rgba(26, 26, 36, 0.8) 100%);
@@ -276,8 +285,12 @@
 
   /* claim panel */
   .claim-panel {
-    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px;
+    background: var(--surface); 
+    border: 1px solid var(--border); 
+    border-radius: 12px; 
+    padding: 24px;
     margin-bottom: 2rem;
+    animation: fadeInUp 0.6s ease-out;
   }
   .claim-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 13px; }
   .claim-row:not(:last-child) { border-bottom: 1px solid var(--border); }
@@ -318,8 +331,14 @@
 
   /* success overlay */
   .success-card {
-    background: rgba(62,207,142,0.06); border: 1px solid rgba(62,207,142,0.25);
-    border-radius: 12px; padding: 28px; text-align: center; margin-top: 1rem;
+    background: rgba(62,207,142,0.06); 
+    border: 1px solid rgba(62,207,142,0.25);
+    border-radius: 12px; 
+    padding: 28px; 
+    text-align: center; 
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+    animation: fadeInUp 0.6s ease-out;
   }
   .success-icon { font-size: 3rem; margin-bottom: 12px; display: block; }
   .success-title { font-family: var(--display); font-size: 1.4rem; font-weight: 800; color: var(--green); margin-bottom: 6px; }
@@ -456,6 +475,19 @@
   /* Large tablets and small desktops */
   @media (min-width: 769px) and (max-width: 1024px) {
     .badge-grid { grid-template-columns: repeat(3, 1fr); }
+    .wrap { max-width: 95%; }
+  }
+  
+  /* Standard laptops */
+  @media (min-width: 1025px) and (max-width: 1440px) {
+    .badge-grid { grid-template-columns: repeat(3, 1fr); }
+    .wrap { max-width: 900px; }
+  }
+  
+  /* Large screens */
+  @media (min-width: 1441px) {
+    .badge-grid { grid-template-columns: repeat(3, 1fr); }
+    .wrap { max-width: 1000px; }
   }
 </style>
 </head>
