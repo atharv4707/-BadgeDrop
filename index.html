@@ -64,11 +64,33 @@
   /* hero */
   .hero { margin-bottom: 2.5rem; }
   .hero h1 {
-    font-family: var(--display); font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800;
+    font-family: var(--display); font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 800;
     line-height: 1.1; letter-spacing: -1.5px; margin-bottom: 0.75rem;
+    background: linear-gradient(135deg, #f0eff8 0%, #a08bff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: fadeInUp 0.8s ease-out;
   }
-  .hero h1 em { color: var(--accent2); font-style: normal; }
-  .hero p { color: var(--muted); font-size: 1rem; line-height: 1.6; max-width: 520px; }
+  .hero h1 em { 
+    background: linear-gradient(135deg, #7c6ef5 0%, #a08bff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-style: normal; 
+  }
+  .hero p { 
+    color: var(--muted); 
+    font-size: 1.1rem; 
+    line-height: 1.7; 
+    max-width: 560px;
+    animation: fadeInUp 0.8s ease-out 0.2s both;
+  }
+  
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
   /* ugf banner */
   .ugf-banner {
@@ -102,44 +124,151 @@
   .btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
   .btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .btn-primary {
-    background: var(--accent); border-color: var(--accent); color: #fff; font-size: 14px;
-    padding: 10px 22px; width: 100%; border-radius: 9px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    border: none;
+    color: #fff; 
+    font-size: 14px;
+    font-weight: 600;
+    padding: 12px 24px; 
+    width: 100%; 
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(124, 110, 245, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
   }
-  .btn-primary:hover:not(:disabled) { background: var(--accent2); border-color: var(--accent2); }
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+  .btn-primary:hover:not(:disabled) { 
+    background: linear-gradient(135deg, var(--accent2) 0%, var(--accent) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(124, 110, 245, 0.4);
+  }
+  .btn-primary:hover:not(:disabled)::before {
+    left: 100%;
+  }
+  .btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+  }
+  .btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
 
   /* badge grid */
   .section-title {
-    font-family: var(--display); font-size: 0.75rem; font-weight: 700;
-    letter-spacing: 2px; text-transform: uppercase; color: var(--muted);
-    margin-bottom: 1rem;
+    font-family: var(--display); font-size: 0.85rem; font-weight: 700;
+    letter-spacing: 2.5px; text-transform: uppercase; color: var(--accent2);
+    margin-bottom: 1.2rem;
+    animation: fadeIn 0.6s ease-out;
   }
-  .badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-bottom: 2.5rem; }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  .badge-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+    gap: 16px; 
+    margin-bottom: 2.5rem;
+    animation: fadeInUp 0.8s ease-out 0.4s both;
+  }
   .badge-card {
-    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
-    padding: 20px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
+    background: linear-gradient(135deg, var(--surface) 0%, rgba(26, 26, 36, 0.8) 100%);
+    border: 1px solid var(--border); 
+    border-radius: 14px;
+    padding: 24px; 
+    cursor: pointer; 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+    position: relative; 
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  .badge-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
   }
   .badge-card::after {
     content: ''; position: absolute; inset: 0;
-    background: radial-gradient(circle at 50% 0%, rgba(124,110,245,0.07), transparent 70%);
-    opacity: 0; transition: opacity 0.2s;
+    background: radial-gradient(circle at 50% 0%, rgba(124,110,245,0.12), transparent 70%);
+    opacity: 0; transition: opacity 0.3s ease;
   }
-  .badge-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .badge-card:hover { 
+    border-color: var(--accent2); 
+    transform: translateY(-4px) scale(1.02); 
+    box-shadow: 0 12px 24px rgba(124, 110, 245, 0.2);
+  }
+  .badge-card:hover::before { transform: scaleX(1); }
   .badge-card:hover::after { opacity: 1; }
-  .badge-card.selected { border-color: var(--accent); background: rgba(124,110,245,0.08); }
-  .badge-card.selected::after { opacity: 1; }
-  .badge-card.claimed { opacity: 0.5; cursor: default; }
-  .badge-card.claimed:hover { transform: none; }
-  .badge-icon { font-size: 2rem; margin-bottom: 10px; display: block; }
-  .badge-name { font-family: var(--display); font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
-  .badge-desc { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 10px; }
-  .badge-tag {
-    display: inline-block; font-family: var(--mono); font-size: 10px; font-weight: 500;
-    padding: 3px 7px; border-radius: 4px; letter-spacing: 0.3px;
+  .badge-card.selected { 
+    border-color: var(--accent); 
+    background: linear-gradient(135deg, rgba(124,110,245,0.15) 0%, rgba(160,139,255,0.1) 100%);
+    box-shadow: 0 8px 16px rgba(124, 110, 245, 0.3);
+    transform: translateY(-2px);
   }
-  .tag-rare { background: rgba(124,110,245,0.15); color: var(--accent2); }
-  .tag-common { background: rgba(136,135,160,0.15); color: var(--muted); }
-  .tag-epic { background: rgba(244,197,66,0.12); color: var(--amber); }
-  .claimed-badge { position: absolute; top: 10px; right: 10px; font-size: 10px; font-family: var(--mono); background: rgba(62,207,142,0.1); color: var(--green); border: 1px solid rgba(62,207,142,0.2); padding: 2px 7px; border-radius: 4px; }
+  .badge-card.selected::before { transform: scaleX(1); }
+  .badge-card.selected::after { opacity: 1; }
+  .badge-card.claimed { opacity: 0.6; cursor: default; filter: grayscale(0.3); }
+  .badge-card.claimed:hover { transform: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+  .badge-icon { 
+    font-size: 2.5rem; 
+    margin-bottom: 12px; 
+    display: block;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    transition: transform 0.3s ease;
+  }
+  .badge-card:hover .badge-icon { transform: scale(1.1) rotate(5deg); }
+  .badge-name { 
+    font-family: var(--display); 
+    font-size: 1.05rem; 
+    font-weight: 700; 
+    margin-bottom: 6px;
+    background: linear-gradient(135deg, var(--text) 0%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .badge-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 12px; }
+  .badge-tag {
+    display: inline-block; font-family: var(--mono); font-size: 10px; font-weight: 600;
+    padding: 4px 9px; border-radius: 5px; letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  .tag-rare { background: linear-gradient(135deg, rgba(124,110,245,0.2), rgba(160,139,255,0.15)); color: var(--accent2); border: 1px solid rgba(124,110,245,0.3); }
+  .tag-common { background: rgba(136,135,160,0.15); color: var(--muted); border: 1px solid rgba(136,135,160,0.2); }
+  .tag-epic { background: linear-gradient(135deg, rgba(244,197,66,0.15), rgba(244,197,66,0.1)); color: var(--amber); border: 1px solid rgba(244,197,66,0.3); }
+  .claimed-badge { 
+    position: absolute; 
+    top: 12px; 
+    right: 12px; 
+    font-size: 10px; 
+    font-family: var(--mono); 
+    background: linear-gradient(135deg, rgba(62,207,142,0.15), rgba(62,207,142,0.1)); 
+    color: var(--green); 
+    border: 1px solid rgba(62,207,142,0.3); 
+    padding: 3px 9px; 
+    border-radius: 5px;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
 
   /* claim panel */
   .claim-panel {
@@ -239,17 +368,17 @@
   </div>
 
   <div class="hero">
-    <h1>Claim your onchain<br/><em>badges — gaslessly.</em></h1>
-    <p>No ETH needed. UGF pays your gas. You pay a tiny fee in Mock USD and your badge lands in your wallet.</p>
+    <h1>Collect Your Onchain<br/><em>Achievements — Effortlessly.</em></h1>
+    <p>Experience the future of digital collectibles. Claim exclusive badges with zero gas fees. Just connect your wallet and start collecting — we handle the rest.</p>
   </div>
 
   <div class="ugf-banner">
     <div class="dot"></div>
-    Powered by Universal Gas Framework — gas abstraction via UGF Testnet SDK
+    Powered by Universal Gas Framework — Experience seamless gasless transactions
   </div>
 
   <div class="mock-note">
-    ℹ️ Demo UI — wire up @tychilabs/ugf-testnet-js where marked // UGF: and deploy your badge NFT contract on Base Sepolia
+    ℹ️ Testnet Demo — This is a demonstration on Base Sepolia testnet. All transactions use test tokens with no real value.
   </div>
 
   <!-- Wallet Bar -->
@@ -263,12 +392,12 @@
   </div>
 
   <!-- Badge Grid -->
-  <div class="section-title">Available Badges</div>
+  <div class="section-title">✨ Exclusive Collection</div>
   <div class="badge-grid" id="badgeGrid"></div>
 
   <!-- Claim Panel -->
   <div id="claimPanel" class="claim-panel" style="display:none">
-    <div class="section-title" style="margin-bottom:1.2rem">Claim Summary</div>
+    <div class="section-title" style="margin-bottom:1.2rem">🎯 Claim Details</div>
 
     <!-- Steps -->
     <div class="steps" id="stepFlow">
@@ -295,29 +424,29 @@
 
     <!-- Details -->
     <div class="claim-row">
-      <span class="key">Badge</span>
+      <span class="key">Selected Badge</span>
       <span class="val accent" id="claimBadgeName">—</span>
     </div>
     <div class="claim-row">
-      <span class="key">Gas fee (in mUSD)</span>
-      <span class="val" id="claimFee">Fetching quote…</span>
+      <span class="key">Transaction Fee</span>
+      <span class="val" id="claimFee">Calculating...</span>
     </div>
     <div class="claim-row">
-      <span class="key">ETH required from you</span>
-      <span class="val green">0.00 ETH ✓</span>
+      <span class="key">Your ETH Cost</span>
+      <span class="val green">0.00 ETH — Completely Free ✓</span>
     </div>
     <div class="claim-row">
-      <span class="key">Destination</span>
+      <span class="key">Recipient</span>
       <span class="val" id="claimDest">—</span>
     </div>
     <div class="claim-row">
-      <span class="key">Network</span>
-      <span class="val">Base Sepolia (84532)</span>
+      <span class="key">Blockchain</span>
+      <span class="val">Base Sepolia Testnet</span>
     </div>
 
     <div style="margin-top: 1.25rem">
       <button class="btn btn-primary" id="claimBtn" onclick="startClaim()" disabled>
-        Connect wallet first
+        Connect Your Wallet to Continue
       </button>
     </div>
 
@@ -325,35 +454,35 @@
 
     <!-- TX Log -->
     <div class="tx-log" id="txLog">
-      <div class="log-line"><span class="log-time">[ready]</span><span class="log-msg">Select a badge above to start</span></div>
+      <div class="log-line"><span class="log-time">[ready]</span><span class="log-msg">Select a badge above to begin your journey</span></div>
     </div>
 
     <!-- Faucet hint -->
     <div class="faucet-hint">
-      Need Mock USD? Get it free at
-      <a href="https://universalgasframework.com/faucets" target="_blank">universalgasframework.com/faucets</a>
-      — just connect your wallet.
+      💎 Need Mock USD? Get free testnet tokens at
+      <a href="https://universalgasframework.com/faucets" target="_blank">UGF Faucet</a>
+      — Connect your wallet and claim instantly.
     </div>
   </div>
 
   <!-- Success -->
   <div id="successCard" class="success-card" style="display:none">
     <span class="success-icon" id="successIcon">🎉</span>
-    <div class="success-title" id="successTitle">Badge Claimed!</div>
-    <div class="success-sub" id="successSub">Your badge is now on Base Sepolia</div>
-    <a href="#" class="tx-link" id="txLink" target="_blank">View on BaseScan →</a>
+    <div class="success-title" id="successTitle">Achievement Unlocked!</div>
+    <div class="success-sub" id="successSub">Your badge has been minted and is now in your collection</div>
+    <a href="#" class="tx-link" id="txLink" target="_blank">View Transaction on BaseScan →</a>
   </div>
 
 </div>
 
 <script>
 const BADGES = [
-  { id: 1, icon: '🔥', name: 'Early Adopter', desc: 'First 500 to claim on Base Sepolia', tag: 'epic', tagLabel: 'EPIC', claimed: false },
-  { id: 2, icon: '⚡', name: 'Gas Slayer', desc: 'Proved ETH is optional', tag: 'rare', tagLabel: 'RARE', claimed: false },
-  { id: 3, icon: '🌐', name: 'Web3 Native', desc: 'Completed a gasless onchain action', tag: 'common', tagLabel: 'COMMON', claimed: false },
-  { id: 4, icon: '🤖', name: 'UGF Pioneer', desc: 'Used Universal Gas Framework', tag: 'epic', tagLabel: 'EPIC', claimed: false },
-  { id: 5, icon: '🏆', name: 'Hackathon Builder', desc: 'Deployed a dApp using UGF SDK', tag: 'rare', tagLabel: 'RARE', claimed: false },
-  { id: 6, icon: '🎯', name: 'Base Builder', desc: 'Participated in Base Sepolia testnet', tag: 'common', tagLabel: 'COMMON', claimed: false },
+  { id: 1, icon: '🔥', name: 'Early Adopter', desc: 'Join the pioneers shaping the future of Web3', tag: 'epic', tagLabel: 'EPIC', claimed: false },
+  { id: 2, icon: '⚡', name: 'Gas Slayer', desc: 'Master of gasless transactions and efficiency', tag: 'rare', tagLabel: 'RARE', claimed: false },
+  { id: 3, icon: '🌐', name: 'Web3 Native', desc: 'Embracing the decentralized revolution', tag: 'common', tagLabel: 'COMMON', claimed: false },
+  { id: 4, icon: '🤖', name: 'UGF Pioneer', desc: 'Exploring cutting-edge gas abstraction', tag: 'epic', tagLabel: 'EPIC', claimed: false },
+  { id: 5, icon: '🏆', name: 'Hackathon Builder', desc: 'Creating innovative solutions with passion', tag: 'rare', tagLabel: 'RARE', claimed: false },
+  { id: 6, icon: '🎯', name: 'Base Builder', desc: 'Building on Coinbase\'s Layer 2 network', tag: 'common', tagLabel: 'COMMON', claimed: false },
 ];
 
 // ── UGF SDK CONFIG ──────────────────────────────────────────
@@ -361,8 +490,8 @@ const BADGES = [
 // No npm installation needed - works directly in the browser!
 // Docs: https://universalgasframework.com/docs/testnet
 //
-// Common Base Sepolia USDC address (verify on UGF faucet page)
-const MOCK_USD_ADDRESS = '0x036CbD53842c5426634e7929541eC2318f3dCF7e'; // Base Sepolia USDC
+// TYI_MOCK_USD token address on Base Sepolia (from UGF faucet)
+const MOCK_USD_ADDRESS = '0x27DC1C167AeF232bb1e21073304B526726a8727e'; // ✅ Verified!
 const BADGE_CONTRACT = '0xd92317c93d3B865FBC461e53a70d16Bd05686E46'; // ✅ Deployed!
 
 // Initialize UGF Client (will be loaded from CDN)
@@ -485,10 +614,10 @@ async function refreshBalance() {
 }
 
 async function fetchQuote() {
-  document.getElementById('claimFee').textContent = 'Fetching quote…';
-  document.getElementById('claimBtn').textContent = 'Fetching quote…';
+  document.getElementById('claimFee').textContent = 'Calculating...';
+  document.getElementById('claimBtn').textContent = 'Calculating Fee...';
   document.getElementById('claimBtn').disabled = true;
-  addLog('Requesting gas quote from UGF…', 'accent');
+  addLog('Requesting gas quote from Universal Gas Framework…', 'accent');
 
   // Check if UGF is ready and contracts are configured
   if (!ugf || BADGE_CONTRACT === '0x...') {
@@ -521,10 +650,10 @@ async function fetchQuote() {
     
     if (wallet) {
       document.getElementById('claimBtn').disabled = false;
-      document.getElementById('claimBtn').textContent = 'Claim Badge — Pay $' + quoteResult.feeInUSD + ' mUSD';
+      document.getElementById('claimBtn').textContent = 'Claim Your Badge — Pay $' + quoteResult.feeInUSD + ' mUSD';
       document.getElementById('claimDest').textContent = wallet.slice(0,6) + '…' + wallet.slice(-4);
     } else {
-      document.getElementById('claimBtn').textContent = 'Connect wallet first';
+      document.getElementById('claimBtn').textContent = 'Connect Your Wallet to Continue';
     }
   } catch (e) {
     console.error('Failed to fetch quote:', e);
@@ -606,10 +735,10 @@ async function startClaim() {
 
     // Show success
     document.getElementById('successIcon').textContent = selectedBadge.icon;
-    document.getElementById('successTitle').textContent = selectedBadge.name + ' Claimed!';
-    document.getElementById('successSub').textContent = 'Minted to ' + wallet.slice(0,6) + '…' + wallet.slice(-4) + ' — no ETH used.';
+    document.getElementById('successTitle').textContent = selectedBadge.name + ' Unlocked!';
+    document.getElementById('successSub').textContent = 'Minted to ' + wallet.slice(0,6) + '…' + wallet.slice(-4) + ' — Zero gas fees paid by you.';
     document.getElementById('txLink').href = 'https://sepolia.basescan.org/tx/' + txHash;
-    document.getElementById('txLink').textContent = 'View on BaseScan → ' + txHash.slice(0,12) + '…';
+    document.getElementById('txLink').textContent = 'View Transaction → ' + txHash.slice(0,12) + '…';
     document.getElementById('successCard').style.display = '';
     document.getElementById('claimPanel').style.display = 'none';
 
