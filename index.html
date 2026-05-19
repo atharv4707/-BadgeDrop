@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BadgeDrop — Gasless NFT Badges on Base</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a24;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0eff8;
+    --muted: #8887a0;
+    --accent: #7c6ef5;
+    --accent2: #a08bff;
+    --green: #3ecf8e;
+    --amber: #f4c542;
+    --red: #f87171;
+    --mono: 'DM Mono', monospace;
+    --display: 'Syne', sans-serif;
+    --body: 'DM Sans', sans-serif;
+  }
+
+  body {
+    font-family: var(--body);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+  }
+
+  /* grid noise background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(124,110,245,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,110,245,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap { max-width: 860px; margin: 0 auto; position: relative; z-index: 1; }
+
+  /* header */
+  .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3rem; }
+  .logo { font-family: var(--display); font-size: 1.1rem; font-weight: 800; letter-spacing: -0.5px; color: var(--text); }
+  .logo span { color: var(--accent2); }
+  .chain-pill {
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+    background: rgba(124,110,245,0.12); border: 1px solid rgba(124,110,245,0.3);
+    color: var(--accent2); padding: 4px 10px; border-radius: 20px; letter-spacing: 0.5px;
+  }
+
+  /* hero */
+  .hero { margin-bottom: 2.5rem; }
+  .hero h1 {
+    font-family: var(--display); font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800;
+    line-height: 1.1; letter-spacing: -1.5px; margin-bottom: 0.75rem;
+  }
+  .hero h1 em { color: var(--accent2); font-style: normal; }
+  .hero p { color: var(--muted); font-size: 1rem; line-height: 1.6; max-width: 520px; }
+
+  /* ugf banner */
+  .ugf-banner {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(62,207,142,0.06); border: 1px solid rgba(62,207,142,0.2);
+    border-radius: 8px; padding: 10px 14px; margin-bottom: 2rem;
+    font-size: 13px; color: var(--green);
+  }
+  .ugf-banner .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  /* wallet bar */
+  .wallet-bar {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 2rem;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px;
+  }
+  .wallet-status { flex: 1; font-family: var(--mono); font-size: 12px; }
+  .wallet-status .label { color: var(--muted); font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 2px; }
+  .wallet-status .addr { color: var(--text); }
+  .balance-pill {
+    font-family: var(--mono); font-size: 12px;
+    background: rgba(244,197,66,0.1); border: 1px solid rgba(244,197,66,0.25);
+    color: var(--amber); padding: 4px 10px; border-radius: 6px;
+  }
+  .btn {
+    font-family: var(--body); font-size: 13px; font-weight: 500;
+    border: 1px solid var(--border2); background: var(--surface2);
+    color: var(--text); border-radius: 8px; padding: 8px 16px;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary {
+    background: var(--accent); border-color: var(--accent); color: #fff; font-size: 14px;
+    padding: 10px 22px; width: 100%; border-radius: 9px;
+  }
+  .btn-primary:hover:not(:disabled) { background: var(--accent2); border-color: var(--accent2); }
+
+  /* badge grid */
+  .section-title {
+    font-family: var(--display); font-size: 0.75rem; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase; color: var(--muted);
+    margin-bottom: 1rem;
+  }
+  .badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-bottom: 2.5rem; }
+  .badge-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
+  }
+  .badge-card::after {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(124,110,245,0.07), transparent 70%);
+    opacity: 0; transition: opacity 0.2s;
+  }
+  .badge-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .badge-card:hover::after { opacity: 1; }
+  .badge-card.selected { border-color: var(--accent); background: rgba(124,110,245,0.08); }
+  .badge-card.selected::after { opacity: 1; }
+  .badge-card.claimed { opacity: 0.5; cursor: default; }
+  .badge-card.claimed:hover { transform: none; }
+  .badge-icon { font-size: 2rem; margin-bottom: 10px; display: block; }
+  .badge-name { font-family: var(--display); font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+  .badge-desc { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 10px; }
+  .badge-tag {
+    display: inline-block; font-family: var(--mono); font-size: 10px; font-weight: 500;
+    padding: 3px 7px; border-radius: 4px; letter-spacing: 0.3px;
+  }
+  .tag-rare { background: rgba(124,110,245,0.15); color: var(--accent2); }
+  .tag-common { background: rgba(136,135,160,0.15); color: var(--muted); }
+  .tag-epic { background: rgba(244,197,66,0.12); color: var(--amber); }
+  .claimed-badge { position: absolute; top: 10px; right: 10px; font-size: 10px; font-family: var(--mono); background: rgba(62,207,142,0.1); color: var(--green); border: 1px solid rgba(62,207,142,0.2); padding: 2px 7px; border-radius: 4px; }
+
+  /* claim panel */
+  .claim-panel {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px;
+    margin-bottom: 2rem;
+  }
+  .claim-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; font-size: 13px; }
+  .claim-row:not(:last-child) { border-bottom: 1px solid var(--border); }
+  .claim-row .key { color: var(--muted); }
+  .claim-row .val { font-family: var(--mono); font-size: 12px; }
+  .claim-row .val.green { color: var(--green); }
+  .claim-row .val.accent { color: var(--accent2); }
+
+  /* step flow */
+  .steps { display: flex; align-items: center; gap: 0; margin-bottom: 1.5rem; }
+  .step { display: flex; align-items: center; gap: 8px; font-size: 12px; font-family: var(--mono); }
+  .step-dot {
+    width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--border2);
+    background: var(--surface2); display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 500; flex-shrink: 0;
+  }
+  .step.active .step-dot { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .step.done .step-dot { background: var(--green); border-color: var(--green); color: #000; }
+  .step .label { color: var(--muted); }
+  .step.active .label { color: var(--text); }
+  .step.done .label { color: var(--green); }
+  .step-line { flex: 1; height: 1px; background: var(--border); margin: 0 8px; }
+  .step-line.done { background: var(--green); }
+
+  /* tx log */
+  .tx-log {
+    background: #0d0d15; border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 16px; font-family: var(--mono); font-size: 11px; line-height: 1.9;
+    margin-top: 1rem; max-height: 180px; overflow-y: auto;
+  }
+  .log-line { display: flex; gap: 8px; }
+  .log-time { color: var(--muted); flex-shrink: 0; }
+  .log-msg { color: var(--text); }
+  .log-msg.green { color: var(--green); }
+  .log-msg.amber { color: var(--amber); }
+  .log-msg.red { color: var(--red); }
+  .log-msg.accent { color: var(--accent2); }
+
+  /* success overlay */
+  .success-card {
+    background: rgba(62,207,142,0.06); border: 1px solid rgba(62,207,142,0.25);
+    border-radius: 12px; padding: 28px; text-align: center; margin-top: 1rem;
+  }
+  .success-icon { font-size: 3rem; margin-bottom: 12px; display: block; }
+  .success-title { font-family: var(--display); font-size: 1.4rem; font-weight: 800; color: var(--green); margin-bottom: 6px; }
+  .success-sub { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+  .tx-link { font-family: var(--mono); font-size: 11px; color: var(--accent2); text-decoration: none; }
+  .tx-link:hover { text-decoration: underline; }
+
+  /* faucet hint */
+  .faucet-hint {
+    background: rgba(124,110,245,0.06); border: 1px solid rgba(124,110,245,0.15);
+    border-radius: 8px; padding: 12px 14px; font-size: 12px; color: var(--muted);
+    margin-top: 1rem;
+  }
+  .faucet-hint a { color: var(--accent2); text-decoration: none; }
+  .faucet-hint a:hover { text-decoration: underline; }
+
+  /* error */
+  .error-box {
+    background: rgba(248,113,113,0.06); border: 1px solid rgba(248,113,113,0.2);
+    border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--red); margin-top: 10px;
+  }
+
+  /* spinner */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner {
+    display: inline-block; width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,0.2); border-top-color: #fff;
+    border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px;
+  }
+
+  /* mockup note */
+  .mock-note {
+    font-size: 11px; font-family: var(--mono); color: var(--muted);
+    background: rgba(136,135,160,0.07); border: 1px solid rgba(136,135,160,0.1);
+    border-radius: 6px; padding: 8px 12px; margin-bottom: 1.5rem;
+  }
+
+  @media (max-width: 500px) {
+    .badge-grid { grid-template-columns: 1fr 1fr; }
+    .wallet-bar { flex-wrap: wrap; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="logo">Badge<span>Drop</span></div>
+    <div class="chain-pill">BASE SEPOLIA</div>
+  </div>
+
+  <div class="hero">
+    <h1>Claim your onchain<br/><em>badges — gaslessly.</em></h1>
+    <p>No ETH needed. UGF pays your gas. You pay a tiny fee in Mock USD and your badge lands in your wallet.</p>
+  </div>
+
+  <div class="ugf-banner">
+    <div class="dot"></div>
+    Powered by Universal Gas Framework — gas abstraction via UGF Testnet SDK
+  </div>
+
+  <div class="mock-note">
+    ℹ️ Demo UI — wire up @tychilabs/ugf-testnet-js where marked // UGF: and deploy your badge NFT contract on Base Sepolia
+  </div>
+
+  <!-- Wallet Bar -->
+  <div id="walletBar" class="wallet-bar">
+    <div class="wallet-status">
+      <div class="label">Wallet</div>
+      <div class="addr" id="walletAddr">Not connected</div>
+    </div>
+    <div class="balance-pill" id="usdBalance" style="display:none">0 mUSD</div>
+    <button class="btn" id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
+  </div>
+
+  <!-- Badge Grid -->
+  <div class="section-title">Available Badges</div>
+  <div class="badge-grid" id="badgeGrid"></div>
+
+  <!-- Claim Panel -->
+  <div id="claimPanel" class="claim-panel" style="display:none">
+    <div class="section-title" style="margin-bottom:1.2rem">Claim Summary</div>
+
+    <!-- Steps -->
+    <div class="steps" id="stepFlow">
+      <div class="step active" id="s1">
+        <div class="step-dot">1</div>
+        <span class="label">Quote</span>
+      </div>
+      <div class="step-line" id="sl1"></div>
+      <div class="step" id="s2">
+        <div class="step-dot">2</div>
+        <span class="label">Approve</span>
+      </div>
+      <div class="step-line" id="sl2"></div>
+      <div class="step" id="s3">
+        <div class="step-dot">3</div>
+        <span class="label">Settle</span>
+      </div>
+      <div class="step-line" id="sl3"></div>
+      <div class="step" id="s4">
+        <div class="step-dot">4</div>
+        <span class="label">Confirm</span>
+      </div>
+    </div>
+
+    <!-- Details -->
+    <div class="claim-row">
+      <span class="key">Badge</span>
+      <span class="val accent" id="claimBadgeName">—</span>
+    </div>
+    <div class="claim-row">
+      <span class="key">Gas fee (in mUSD)</span>
+      <span class="val" id="claimFee">Fetching quote…</span>
+    </div>
+    <div class="claim-row">
+      <span class="key">ETH required from you</span>
+      <span class="val green">0.00 ETH ✓</span>
+    </div>
+    <div class="claim-row">
+      <span class="key">Destination</span>
+      <span class="val" id="claimDest">—</span>
+    </div>
+    <div class="claim-row">
+      <span class="key">Network</span>
+      <span class="val">Base Sepolia (84532)</span>
+    </div>
+
+    <div style="margin-top: 1.25rem">
+      <button class="btn btn-primary" id="claimBtn" onclick="startClaim()" disabled>
+        Connect wallet first
+      </button>
+    </div>
+
+    <div id="errorBox" class="error-box" style="display:none"></div>
+
+    <!-- TX Log -->
+    <div class="tx-log" id="txLog">
+      <div class="log-line"><span class="log-time">[ready]</span><span class="log-msg">Select a badge above to start</span></div>
+    </div>
+
+    <!-- Faucet hint -->
+    <div class="faucet-hint">
+      Need Mock USD? Get it free at
+      <a href="https://universalgasframework.com/faucets" target="_blank">universalgasframework.com/faucets</a>
+      — just connect your wallet.
+    </div>
+  </div>
+
+  <!-- Success -->
+  <div id="successCard" class="success-card" style="display:none">
+    <span class="success-icon" id="successIcon">🎉</span>
+    <div class="success-title" id="successTitle">Badge Claimed!</div>
+    <div class="success-sub" id="successSub">Your badge is now on Base Sepolia</div>
+    <a href="#" class="tx-link" id="txLink" target="_blank">View on BaseScan →</a>
+  </div>
+
+</div>
+
+<script>
+const BADGES = [
+  { id: 1, icon: '🔥', name: 'Early Adopter', desc: 'First 500 to claim on Base Sepolia', tag: 'epic', tagLabel: 'EPIC', claimed: false },
+  { id: 2, icon: '⚡', name: 'Gas Slayer', desc: 'Proved ETH is optional', tag: 'rare', tagLabel: 'RARE', claimed: false },
+  { id: 3, icon: '🌐', name: 'Web3 Native', desc: 'Completed a gasless onchain action', tag: 'common', tagLabel: 'COMMON', claimed: false },
+  { id: 4, icon: '🤖', name: 'UGF Pioneer', desc: 'Used Universal Gas Framework', tag: 'epic', tagLabel: 'EPIC', claimed: false },
+  { id: 5, icon: '🏆', name: 'Hackathon Builder', desc: 'Deployed a dApp using UGF SDK', tag: 'rare', tagLabel: 'RARE', claimed: false },
+  { id: 6, icon: '🎯', name: 'Base Builder', desc: 'Participated in Base Sepolia testnet', tag: 'common', tagLabel: 'COMMON', claimed: false },
+];
+
+// ── UGF SDK CONFIG ──────────────────────────────────────────
+// UGF SDK is loaded from CDN (see initUGF function below)
+// No npm installation needed - works directly in the browser!
+// Docs: https://universalgasframework.com/docs/testnet
+//
+// Common Base Sepolia USDC address (verify on UGF faucet page)
+const MOCK_USD_ADDRESS = '0x036CbD53842c5426634e7929541eC2318f3dCF7e'; // Base Sepolia USDC
+const BADGE_CONTRACT = '0xd92317c93d3B865FBC461e53a70d16Bd05686E46'; // ✅ Deployed!
+
+// Initialize UGF Client (will be loaded from CDN)
+let ugf = null;
+
+// Initialize UGF when page loads
+async function initUGF() {
+  try {
+    // Load UGF SDK from CDN (no npm install needed!)
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/@tychilabs/ugf-testnet-js@latest/dist/index.umd.js';
+    script.onload = () => {
+      if (window.UGFTestnet && window.UGFTestnet.UGFClient) {
+        ugf = new window.UGFTestnet.UGFClient({ network: 'base-sepolia' });
+        console.log('✓ UGF SDK initialized');
+      }
+    };
+    document.head.appendChild(script);
+  } catch (e) {
+    console.error('Failed to load UGF SDK:', e);
+  }
+}
+// ────────────────────────────────────────────────────────────
+
+let wallet = null;
+let provider = null;
+let signer = null;
+let selectedBadge = null;
+let quoteResult = null;
+
+// Render badge grid
+function renderBadges() {
+  const grid = document.getElementById('badgeGrid');
+  grid.innerHTML = BADGES.map(b => `
+    <div class="badge-card${b.claimed ? ' claimed' : ''}" id="bc-${b.id}" onclick="selectBadge(${b.id})">
+      ${b.claimed ? '<span class="claimed-badge">CLAIMED</span>' : ''}
+      <span class="badge-icon">${b.icon}</span>
+      <div class="badge-name">${b.name}</div>
+      <div class="badge-desc">${b.desc}</div>
+      <span class="badge-tag tag-${b.tag}">${b.tagLabel}</span>
+    </div>
+  `).join('');
+}
+
+function selectBadge(id) {
+  const b = BADGES.find(x => x.id === id);
+  if (!b || b.claimed) return;
+  selectedBadge = b;
+  document.querySelectorAll('.badge-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('bc-' + id).classList.add('selected');
+  document.getElementById('claimBadgeName').textContent = b.icon + ' ' + b.name;
+  document.getElementById('claimPanel').style.display = 'block';
+  document.getElementById('successCard').style.display = 'none';
+  resetSteps();
+  fetchQuote();
+}
+
+async function connectWallet() {
+  if (!window.ethereum) {
+    alert('MetaMask not found. Please install MetaMask.');
+    return;
+  }
+  try {
+    provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send('eth_requestAccounts', []);
+    signer = provider.getSigner();
+    wallet = await signer.getAddress();
+
+    document.getElementById('walletAddr').textContent = wallet.slice(0,6) + '…' + wallet.slice(-4);
+    document.getElementById('connectBtn').textContent = 'Connected';
+    document.getElementById('connectBtn').disabled = true;
+    document.getElementById('usdBalance').style.display = '';
+
+    // Switch to Base Sepolia
+    try {
+      await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x14a34' }] });
+    } catch (e) {
+      if (e.code === 4902) {
+        await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{
+          chainId: '0x14a34', chainName: 'Base Sepolia',
+          rpcUrls: ['https://sepolia.base.org'],
+          nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+          blockExplorerUrls: ['https://sepolia.basescan.org']
+        }]});
+      }
+    }
+
+    await refreshBalance();
+
+    if (selectedBadge) {
+      document.getElementById('claimBtn').disabled = false;
+      document.getElementById('claimBtn').textContent = 'Claim Badge (pay with mUSD)';
+      document.getElementById('claimDest').textContent = wallet.slice(0,6) + '…' + wallet.slice(-4);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+async function refreshBalance() {
+  if (!ugf || !wallet || MOCK_USD_ADDRESS === '0x...') {
+    document.getElementById('usdBalance').textContent = '50.00 mUSD'; // simulated
+    return;
+  }
+  
+  try {
+    // UGF: read mUSD balance from the ERC-20 contract
+    const mockUSDContract = new ethers.Contract(
+      MOCK_USD_ADDRESS,
+      ['function balanceOf(address) view returns (uint256)'],
+      provider
+    );
+    const balance = await mockUSDContract.balanceOf(wallet);
+    const balanceFormatted = ethers.utils.formatUnits(balance, 18);
+    document.getElementById('usdBalance').textContent = parseFloat(balanceFormatted).toFixed(2) + ' mUSD';
+  } catch (e) {
+    console.error('Failed to fetch mUSD balance:', e);
+    document.getElementById('usdBalance').textContent = '?.?? mUSD';
+  }
+}
+
+async function fetchQuote() {
+  document.getElementById('claimFee').textContent = 'Fetching quote…';
+  document.getElementById('claimBtn').textContent = 'Fetching quote…';
+  document.getElementById('claimBtn').disabled = true;
+  addLog('Requesting gas quote from UGF…', 'accent');
+
+  // Check if UGF is ready and contracts are configured
+  if (!ugf || BADGE_CONTRACT === '0x...') {
+    await delay(900);
+    quoteResult = { feeInUSD: '0.012', txGas: '85000', validFor: 120 };
+    document.getElementById('claimFee').textContent = '$' + quoteResult.feeInUSD + ' mUSD (simulated)';
+    addLog('⚠️ Using simulated quote — configure BADGE_CONTRACT first', 'amber');
+    if (wallet) {
+      document.getElementById('claimBtn').disabled = false;
+      document.getElementById('claimBtn').textContent = 'Claim Badge — Pay $' + quoteResult.feeInUSD + ' mUSD';
+      document.getElementById('claimDest').textContent = wallet.slice(0,6) + '…' + wallet.slice(-4);
+    }
+    return;
+  }
+
+  try {
+    // UGF: Encode the mint function call
+    const iface = new ethers.utils.Interface(['function mint(address to, uint256 badgeId)']);
+    const calldata = iface.encodeFunctionData('mint', [wallet, selectedBadge.id]);
+
+    // UGF: Get real quote from UGF
+    quoteResult = await ugf.getQuote({
+      to: BADGE_CONTRACT,
+      data: calldata,
+      from: wallet
+    });
+
+    document.getElementById('claimFee').textContent = '$' + quoteResult.feeInUSD + ' mUSD';
+    addLog('Quote received: $' + quoteResult.feeInUSD + ' mUSD (valid ' + quoteResult.validFor + 's)', 'green');
+    
+    if (wallet) {
+      document.getElementById('claimBtn').disabled = false;
+      document.getElementById('claimBtn').textContent = 'Claim Badge — Pay $' + quoteResult.feeInUSD + ' mUSD';
+      document.getElementById('claimDest').textContent = wallet.slice(0,6) + '…' + wallet.slice(-4);
+    } else {
+      document.getElementById('claimBtn').textContent = 'Connect wallet first';
+    }
+  } catch (e) {
+    console.error('Failed to fetch quote:', e);
+    addLog('Error fetching quote: ' + e.message, 'red');
+    document.getElementById('claimFee').textContent = 'Error';
+    document.getElementById('claimBtn').textContent = 'Retry';
+    document.getElementById('claimBtn').disabled = false;
+  }
+}
+
+async function startClaim() {
+  if (!wallet || !selectedBadge || !quoteResult) return;
+  document.getElementById('claimBtn').disabled = true;
+  document.getElementById('errorBox').style.display = 'none';
+
+  // Check if using simulated mode
+  const isSimulated = !ugf || BADGE_CONTRACT === '0x...';
+
+  try {
+    // ── STEP 1: QUOTE (already done above) ──
+    setStep(1, 'done'); setStep(2, 'active');
+    addLog('Step 1 complete — quote locked', 'green');
+
+    // ── STEP 2: APPROVE mUSD spend ──
+    addLog('Approving mUSD spend…', 'amber');
+    
+    if (isSimulated) {
+      await delay(1200);
+      addLog('⚠️ Simulated approval (configure contracts for real tx)', 'amber');
+    } else {
+      // UGF: Real approval
+      const approveTx = await ugf.approveMockUSD(signer, quoteResult.feeInUSD);
+      await approveTx.wait();
+      addLog('mUSD spend approved ✓', 'green');
+    }
+    
+    setStep(2, 'done'); setStep(3, 'active');
+
+    // ── STEP 3: SETTLE (pay fee, UGF takes over) ──
+    addLog('Settling — UGF routing the transaction…', 'amber');
+    
+    let txHash;
+    if (isSimulated) {
+      await delay(1800);
+      txHash = '0x' + [...Array(64)].map(() => Math.floor(Math.random()*16).toString(16)).join('');
+      addLog('⚠️ Simulated settlement (configure contracts for real tx)', 'amber');
+    } else {
+      // UGF: Real settlement
+      const settleTx = await ugf.settle(signer, quoteResult);
+      await settleTx.wait();
+      txHash = settleTx.hash;
+      addLog('Settlement tx: ' + txHash.slice(0, 18) + '…', 'accent');
+    }
+    
+    setStep(3, 'done'); setStep(4, 'active');
+
+    // ── STEP 4: CONFIRM badge minted ──
+    addLog('Confirming badge mint on Base Sepolia…', 'amber');
+    
+    if (isSimulated) {
+      await delay(2200);
+      addLog('⚠️ Simulated mint (configure contracts for real tx)', 'amber');
+    } else {
+      // UGF: Wait for execution confirmation
+      const status = await ugf.waitForExecution(txHash);
+      if (!status.success) {
+        throw new Error('Badge mint failed on-chain');
+      }
+      txHash = status.txHash; // Get the actual destination tx hash
+      addLog('Badge minted! Transaction confirmed ✓', 'green');
+    }
+    
+    addLog('Badge minted! Token ID: ' + (100 + selectedBadge.id), 'green');
+    setStep(4, 'done');
+
+    // Mark claimed
+    BADGES.find(b => b.id === selectedBadge.id).claimed = true;
+    renderBadges();
+
+    // Show success
+    document.getElementById('successIcon').textContent = selectedBadge.icon;
+    document.getElementById('successTitle').textContent = selectedBadge.name + ' Claimed!';
+    document.getElementById('successSub').textContent = 'Minted to ' + wallet.slice(0,6) + '…' + wallet.slice(-4) + ' — no ETH used.';
+    document.getElementById('txLink').href = 'https://sepolia.basescan.org/tx/' + txHash;
+    document.getElementById('txLink').textContent = 'View on BaseScan → ' + txHash.slice(0,12) + '…';
+    document.getElementById('successCard').style.display = '';
+    document.getElementById('claimPanel').style.display = 'none';
+
+  } catch (e) {
+    addLog('Error: ' + (e.message || e), 'red');
+    document.getElementById('errorBox').style.display = '';
+    document.getElementById('errorBox').textContent = 'Error: ' + (e.message || String(e));
+    document.getElementById('claimBtn').disabled = false;
+    document.getElementById('claimBtn').textContent = 'Retry';
+  }
+}
+
+function setStep(n, state) {
+  const el = document.getElementById('s' + n);
+  const line = document.getElementById('sl' + n);
+  el.className = 'step ' + state;
+  if (state === 'done') {
+    el.querySelector('.step-dot').textContent = '✓';
+    if (line) line.className = 'step-line done';
+  } else if (state === 'active') {
+    el.querySelector('.step-dot').textContent = n;
+  }
+}
+
+function resetSteps() {
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('s' + i);
+    const line = document.getElementById('sl' + i);
+    el.className = 'step' + (i === 1 ? ' active' : '');
+    el.querySelector('.step-dot').textContent = i;
+    if (line) line.className = 'step-line';
+  }
+  document.getElementById('txLog').innerHTML = '';
+}
+
+function addLog(msg, cls = '') {
+  const log = document.getElementById('txLog');
+  const time = new Date().toLocaleTimeString('en-GB', { hour12: false });
+  const line = document.createElement('div');
+  line.className = 'log-line';
+  line.innerHTML = `<span class="log-time">[${time}]</span><span class="log-msg ${cls}">${msg}</span>`;
+  log.appendChild(line);
+  log.scrollTop = log.scrollHeight;
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// Initialize UGF SDK on page load
+initUGF();
+renderBadges();
+</script>
+</body>
+</html>
