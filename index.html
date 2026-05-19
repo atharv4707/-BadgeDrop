@@ -120,6 +120,8 @@
     border: 1px solid var(--border2); background: var(--surface2);
     color: var(--text); border-radius: 8px; padding: 8px 16px;
     cursor: pointer; transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
   .btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
   .btn:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -194,6 +196,8 @@
     position: relative; 
     overflow: hidden;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
   .badge-card::before {
     content: '';
@@ -353,9 +357,105 @@
     border-radius: 6px; padding: 8px 12px; margin-bottom: 1.5rem;
   }
 
+  @media (max-width: 768px) {
+    body { padding: 1.5rem 1rem 3rem; }
+    
+    .hero h1 { font-size: 2rem; line-height: 1.2; }
+    .hero p { font-size: 0.95rem; }
+    
+    .badge-grid { 
+      grid-template-columns: 1fr; 
+      gap: 12px;
+    }
+    
+    .wallet-bar { 
+      flex-direction: column; 
+      gap: 12px;
+      padding: 14px;
+    }
+    
+    .wallet-status { width: 100%; text-align: center; }
+    .balance-pill { width: 100%; text-align: center; }
+    .btn { width: 100%; }
+    
+    .steps { 
+      flex-wrap: wrap; 
+      gap: 8px;
+    }
+    
+    .step { 
+      flex: 1 1 40%;
+      min-width: 120px;
+    }
+    
+    .step-line { 
+      display: none;
+    }
+    
+    .claim-panel { padding: 18px; }
+    .claim-row { 
+      flex-direction: column; 
+      align-items: flex-start;
+      gap: 4px;
+      padding: 10px 0;
+    }
+    
+    .tx-log { 
+      font-size: 10px;
+      max-height: 150px;
+    }
+    
+    .badge-card { padding: 18px; }
+    .badge-icon { font-size: 2.2rem; }
+    
+    .success-card { padding: 20px; }
+    .success-icon { font-size: 2.5rem; }
+    .success-title { font-size: 1.2rem; }
+  }
+  
   @media (max-width: 500px) {
-    .badge-grid { grid-template-columns: 1fr 1fr; }
-    .wallet-bar { flex-wrap: wrap; }
+    .hero h1 { font-size: 1.75rem; }
+    .hero p { font-size: 0.9rem; }
+    
+    .badge-grid { grid-template-columns: 1fr; }
+    
+    .header { 
+      flex-direction: column; 
+      gap: 12px;
+      text-align: center;
+    }
+    
+    .logo { font-size: 1rem; }
+    
+    .ugf-banner { 
+      font-size: 12px;
+      padding: 8px 12px;
+    }
+    
+    .mock-note { font-size: 10px; }
+    
+    .faucet-hint { font-size: 11px; }
+    
+    .btn-primary { 
+      font-size: 13px;
+      padding: 11px 20px;
+    }
+  }
+  
+  /* Landscape mobile */
+  @media (max-width: 900px) and (orientation: landscape) {
+    .hero h1 { font-size: 1.8rem; }
+    .badge-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  
+  /* Tablet */
+  @media (min-width: 501px) and (max-width: 768px) {
+    .badge-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  
+  /* Large tablets and small desktops */
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .badge-grid { grid-template-columns: repeat(3, 1fr); }
   }
 </style>
 </head>
