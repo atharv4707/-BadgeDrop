@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes" />
 <title>BadgeDrop — Claim NFT badges without ETH</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -33,13 +33,13 @@
     --green: #34d399;
     --amber: #fbbf24;
     --red: #f87171;
-    --mono: 'DM Mono', monospace;
-    --display: 'Syne', sans-serif;
-    --body: 'DM Sans', sans-serif;
-    --header-h: 64px;
-    --page-max: 1180px;
-    --section-gap: 3.5rem;
-    --card-gap: 1.5rem;
+    --mono: 'JetBrains Mono', monospace;
+    --display: 'Space Grotesk', sans-serif;
+    --body: 'Inter', sans-serif;
+    --header-h: 70px;
+    --page-max: 1280px;
+    --section-gap: 4rem;
+    --card-gap: 1.75rem;
     --space: 1.5rem;
   }
 
@@ -60,14 +60,20 @@
     position: fixed;
     inset: 0;
     background:
-      radial-gradient(ellipse 80% 60% at 10% 20%, rgba(124,110,245,0.18) 0%, transparent 55%),
-      radial-gradient(ellipse 70% 50% at 90% 70%, rgba(52,211,153,0.08) 0%, transparent 50%),
-      radial-gradient(ellipse 50% 40% at 50% 100%, rgba(160,139,255,0.1) 0%, transparent 45%),
-      linear-gradient(rgba(124,110,245,0.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(124,110,245,0.025) 1px, transparent 1px);
+      radial-gradient(ellipse 80% 60% at 10% 20%, rgba(124,110,245,0.22) 0%, transparent 55%),
+      radial-gradient(ellipse 70% 50% at 90% 70%, rgba(52,211,153,0.12) 0%, transparent 50%),
+      radial-gradient(ellipse 60% 50% at 50% 100%, rgba(160,139,255,0.15) 0%, transparent 45%),
+      linear-gradient(rgba(124,110,245,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,110,245,0.03) 1px, transparent 1px);
     background-size: 100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px;
     pointer-events: none;
     z-index: 0;
+    animation: backgroundPulse 8s ease-in-out infinite;
+  }
+  
+  @keyframes backgroundPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
   }
 
   .app {
@@ -628,6 +634,35 @@
 
   .mock-note strong { color: var(--text); font-weight: 500; }
 
+  .mobile-wallet-hint {
+    display: none;
+    background: linear-gradient(135deg, rgba(124,110,245,0.12), rgba(160,139,255,0.08));
+    border: 1px solid rgba(124,110,245,0.3);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .mobile-wallet-hint strong {
+    color: var(--accent2);
+    font-weight: 600;
+  }
+
+  .mobile-wallet-hint .icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  @media (max-width: 768px) {
+    .mobile-wallet-hint.show {
+      display: block;
+    }
+  }
+
   .site-footer {
     padding: 1.25rem clamp(1rem, 5vw, 3rem);
     padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
@@ -670,6 +705,102 @@
     border: none;
   }
 
+  /* Stats Cards */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+
+  @media (hover: hover) {
+    .stat-card:hover {
+      border-color: var(--accent2);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(124, 110, 245, 0.15);
+    }
+    .stat-card:hover::before {
+      transform: scaleX(1);
+    }
+  }
+
+  .stat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .stat-icon {
+    font-size: 1.5rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  }
+
+  .stat-value {
+    font-family: var(--display);
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--text);
+    word-break: break-all;
+  }
+
+  .stat-value.gradient {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .stat-sub {
+    font-size: 12px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+
+  .stat-card.gas-saved {
+    background: linear-gradient(135deg, rgba(52,211,153,0.08), rgba(52,211,153,0.04));
+    border-color: rgba(52,211,153,0.2);
+  }
+
+  .stat-card.gas-saved .stat-value {
+    color: var(--green);
+  }
+
   /* Tablet */
   @media (max-width: 900px) {
     .main {
@@ -677,6 +808,11 @@
       padding-left: max(1.25rem, env(safe-area-inset-left));
       padding-right: max(1.25rem, env(safe-area-inset-right));
       gap: 2.25rem;
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.85rem;
     }
 
     .badge-grid {
@@ -702,6 +838,20 @@
       padding-left: max(1rem, env(safe-area-inset-left));
       padding-right: max(1rem, env(safe-area-inset-right));
       gap: var(--section-gap);
+    }
+
+    .stats-grid {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      padding: 1.25rem;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
     }
 
     .logo { font-size: 1.15rem; }
@@ -962,6 +1112,11 @@
     <div class="content-block">
 
   <!-- Wallet Bar -->
+  <div id="mobileWalletHint" class="mobile-wallet-hint">
+    <span class="icon">📱</span>
+    <strong>Using mobile?</strong> Open this page inside the MetaMask mobile app browser to connect your wallet.
+  </div>
+
   <div id="walletBar" class="wallet-bar">
     <div class="wallet-status">
       <div class="label">Connected wallet</div>
@@ -969,6 +1124,45 @@
     </div>
     <div class="balance-pill" id="usdBalance" style="display:none">0 mUSD</div>
     <button class="btn" id="connectBtn" onclick="connectWallet()">Connect MetaMask</button>
+  </div>
+
+  <!-- Stats Grid -->
+  <div id="statsGrid" class="stats-grid" style="display:none">
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-label">Wallet</span>
+        <span class="stat-icon">🦊</span>
+      </div>
+      <div class="stat-value" id="statWallet">0x9c78...2a4ac</div>
+      <div class="stat-sub">Base Sepolia</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-label">Badges Claimed</span>
+        <span class="stat-icon">🎖️</span>
+      </div>
+      <div class="stat-value gradient" id="statBadges">0</div>
+      <div class="stat-sub" id="statAttempts">0 total attempts</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-header">
+        <span class="stat-label">Network</span>
+        <span class="stat-icon">🟢</span>
+      </div>
+      <div class="stat-value">Base Sepolia</div>
+      <div class="stat-sub">Chain ID 84532</div>
+    </div>
+
+    <div class="stat-card gas-saved">
+      <div class="stat-header">
+        <span class="stat-label">Gas Saved</span>
+        <span class="stat-icon">⛽</span>
+      </div>
+      <div class="stat-value" id="statGasSaved">$0.00</div>
+      <div class="stat-sub">vs. paying ETH gas</div>
+    </div>
   </div>
 
   <section class="section-block">
@@ -1084,6 +1278,7 @@ const BADGE_CONTRACT = '0xd92317c93d3B865FBC461e53a70d16Bd05686E46'; // ✅ Depl
 
 // Initialize UGF Client (will be loaded from CDN)
 let ugf = null;
+let ugfReady = false;
 
 // Initialize UGF when page loads
 async function initUGF() {
@@ -1094,12 +1289,18 @@ async function initUGF() {
     script.onload = () => {
       if (window.UGFTestnet && window.UGFTestnet.UGFClient) {
         ugf = new window.UGFTestnet.UGFClient({ network: 'base-sepolia' });
+        ugfReady = true;
         console.log('✓ UGF SDK initialized');
       }
+    };
+    script.onerror = () => {
+      console.warn('⚠️ UGF SDK failed to load - using simulated mode');
+      ugfReady = false;
     };
     document.head.appendChild(script);
   } catch (e) {
     console.error('Failed to load UGF SDK:', e);
+    ugfReady = false;
   }
 }
 // ────────────────────────────────────────────────────────────
@@ -1109,6 +1310,8 @@ let provider = null;
 let signer = null;
 let selectedBadge = null;
 let quoteResult = null;
+let totalAttempts = 0;
+let totalGasSaved = 0;
 
 // Render badge grid
 function renderBadges() {
@@ -1139,7 +1342,23 @@ function selectBadge(id) {
 
 async function connectWallet() {
   if (!window.ethereum) {
-    alert('MetaMask not found. Please install MetaMask.');
+    // Check if user is on mobile
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      // On mobile: redirect to MetaMask app with deep link
+      const dappUrl = window.location.href;
+      const metamaskAppDeepLink = `https://metamask.app.link/dapp/${dappUrl.replace(/^https?:\/\//, '')}`;
+      
+      if (confirm('MetaMask not detected!\n\nTo use this dApp on mobile:\n1. Install MetaMask mobile app\n2. Open this link inside MetaMask browser\n\nOpen in MetaMask now?')) {
+        window.location.href = metamaskAppDeepLink;
+      }
+    } else {
+      // On desktop: prompt to install extension
+      if (confirm('MetaMask not found!\n\nPlease install MetaMask browser extension.\n\nGo to MetaMask.io now?')) {
+        window.open('https://metamask.io/download/', '_blank');
+      }
+    }
     return;
   }
   try {
@@ -1168,6 +1387,7 @@ async function connectWallet() {
     }
 
     await refreshBalance();
+    updateStats();
 
     if (selectedBadge) {
       document.getElementById('claimBtn').disabled = false;
@@ -1207,12 +1427,12 @@ async function fetchQuote() {
   document.getElementById('claimBtn').disabled = true;
   addLog('Requesting gas quote from Universal Gas Framework…', 'accent');
 
-  // Check if UGF is ready and contracts are configured
-  if (!ugf || BADGE_CONTRACT === '0x...') {
+  // Check if UGF is ready
+  if (!ugfReady || !ugf) {
     await delay(900);
-    quoteResult = { feeInUSD: '0.012', txGas: '85000', validFor: 120 };
+    quoteResult = { feeInUSD: '0.012', txGas: '85000', validFor: 120, simulated: true };
     document.getElementById('claimFee').textContent = '$' + quoteResult.feeInUSD + ' mUSD (simulated)';
-    addLog('⚠️ Using simulated quote — configure BADGE_CONTRACT first', 'amber');
+    addLog('⚠️ Using simulated quote — UGF SDK not loaded', 'amber');
     if (wallet) {
       document.getElementById('claimBtn').disabled = false;
       document.getElementById('claimBtn').textContent = 'Claim badge — $' + quoteResult.feeInUSD + ' mUSD';
@@ -1232,6 +1452,7 @@ async function fetchQuote() {
       data: calldata,
       from: wallet
     });
+    quoteResult.simulated = false;
 
     document.getElementById('claimFee').textContent = '$' + quoteResult.feeInUSD + ' mUSD';
     addLog('Quote received: $' + quoteResult.feeInUSD + ' mUSD (valid ' + quoteResult.validFor + 's)', 'green');
@@ -1258,7 +1479,7 @@ async function startClaim() {
   document.getElementById('errorBox').style.display = 'none';
 
   // Check if using simulated mode
-  const isSimulated = !ugf || BADGE_CONTRACT === '0x...';
+  const isSimulated = quoteResult.simulated === true;
 
   try {
     // ── STEP 1: QUOTE (already done above) ──
@@ -1270,7 +1491,7 @@ async function startClaim() {
     
     if (isSimulated) {
       await delay(1200);
-      addLog('⚠️ Simulated approval (configure contracts for real tx)', 'amber');
+      addLog('⚠️ Simulated approval (UGF SDK not loaded)', 'amber');
     } else {
       // UGF: Real approval
       const approveTx = await ugf.approveMockUSD(signer, quoteResult.feeInUSD);
@@ -1286,8 +1507,8 @@ async function startClaim() {
     let txHash;
     if (isSimulated) {
       await delay(1800);
-      txHash = '0x' + [...Array(64)].map(() => Math.floor(Math.random()*16).toString(16)).join('');
-      addLog('⚠️ Simulated settlement (configure contracts for real tx)', 'amber');
+      txHash = null; // No real transaction
+      addLog('⚠️ Simulated settlement (UGF SDK not loaded)', 'amber');
     } else {
       // UGF: Real settlement
       const settleTx = await ugf.settle(signer, quoteResult);
@@ -1303,7 +1524,7 @@ async function startClaim() {
     
     if (isSimulated) {
       await delay(2200);
-      addLog('⚠️ Simulated mint (configure contracts for real tx)', 'amber');
+      addLog('⚠️ Simulated mint (UGF SDK not loaded)', 'amber');
     } else {
       // UGF: Wait for execution confirmation
       const status = await ugf.waitForExecution(txHash);
@@ -1314,19 +1535,35 @@ async function startClaim() {
       addLog('Badge minted! Transaction confirmed ✓', 'green');
     }
     
-    addLog('Badge minted! Token ID: ' + (100 + selectedBadge.id), 'green');
+    addLog('Badge claimed! Token ID: ' + (100 + selectedBadge.id), 'green');
     setStep(4, 'done');
+
+    // Update stats
+    totalAttempts++;
+    const gasSaved = 0.18; // Approximate gas saved per transaction
+    totalGasSaved += gasSaved;
 
     // Mark claimed
     BADGES.find(b => b.id === selectedBadge.id).claimed = true;
     renderBadges();
+    updateStats();
 
     // Show success
     document.getElementById('successIcon').textContent = selectedBadge.icon;
     document.getElementById('successTitle').textContent = selectedBadge.name + ' Unlocked!';
-    document.getElementById('successSub').textContent = 'Minted to ' + wallet.slice(0,6) + '…' + wallet.slice(-4) + ' — you paid with mUSD, not ETH.';
-    document.getElementById('txLink').href = 'https://sepolia.basescan.org/tx/' + txHash;
-    document.getElementById('txLink').textContent = 'View Transaction → ' + txHash.slice(0,12) + '…';
+    
+    if (isSimulated || !txHash) {
+      // Simulated mode - don't show transaction link
+      document.getElementById('successSub').textContent = 'Badge claimed in demo mode! To enable real on-chain minting, the UGF SDK needs to load successfully.';
+      document.getElementById('txLink').style.display = 'none';
+    } else {
+      // Real transaction - show link
+      document.getElementById('successSub').textContent = 'Minted to ' + wallet.slice(0,6) + '…' + wallet.slice(-4) + ' — you paid with mUSD, not ETH.';
+      document.getElementById('txLink').href = 'https://sepolia.basescan.org/tx/' + txHash;
+      document.getElementById('txLink').textContent = 'View Transaction → ' + txHash.slice(0,12) + '…';
+      document.getElementById('txLink').style.display = '';
+    }
+    
     document.getElementById('successCard').style.display = '';
     document.getElementById('claimPanel').style.display = 'none';
 
@@ -1374,9 +1611,32 @@ function addLog(msg, cls = '') {
 
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+function updateStats() {
+  if (!wallet) return;
+  
+  // Show stats grid
+  document.getElementById('statsGrid').style.display = 'grid';
+  
+  // Update wallet address
+  document.getElementById('statWallet').textContent = wallet.slice(0,6) + '...' + wallet.slice(-5);
+  
+  // Update badges claimed
+  const claimedCount = BADGES.filter(b => b.claimed).length;
+  document.getElementById('statBadges').textContent = claimedCount;
+  document.getElementById('statAttempts').textContent = totalAttempts + ' total attempt' + (totalAttempts !== 1 ? 's' : '');
+  
+  // Update gas saved
+  document.getElementById('statGasSaved').textContent = '$' + totalGasSaved.toFixed(2);
+}
+
 // Initialize UGF SDK on page load
 initUGF();
 renderBadges();
+
+// Show mobile wallet hint if on mobile and no wallet detected
+if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) && !window.ethereum) {
+  document.getElementById('mobileWalletHint').classList.add('show');
+}
 </script>
 </body>
 </html>
